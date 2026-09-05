@@ -104,6 +104,8 @@ function Hero() {
   const [chapter, setChapter] = useState(0);
   const titleY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -35]);
   useMotionValueEvent(scrollYProgress, "change", (value) => setChapter(Math.min(2, Math.floor(value * 3))));
+  const currentScene = heroScenes[chapter];
+  if (!currentScene) return null;
 
   return (
     <section ref={ref} id="top" className="relative h-[300vh] bg-deep">
@@ -117,8 +119,8 @@ function Hero() {
 
         <motion.div style={{ y: titleY }} className="relative z-10 mx-auto flex h-full max-w-7xl items-end px-5 pb-20 pt-28 sm:px-8 md:items-center md:pb-0">
           <div className="max-w-3xl text-hero-foreground">
-            <motion.p key={`k-${chapter}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-gold"><span className="h-px w-10 bg-gold" />{heroScenes[chapter].kicker}</motion.p>
-            <motion.h1 key={`t-${chapter}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl text-5xl leading-[0.98] sm:text-6xl md:text-8xl">{chapter === 0 ? "The Roof Doctors ACT" : heroScenes[chapter].title}</motion.h1>
+            <motion.p key={`k-${chapter}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-gold"><span className="h-px w-10 bg-gold" />{currentScene.kicker}</motion.p>
+            <motion.h1 key={`t-${chapter}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl text-5xl leading-[0.98] sm:text-6xl md:text-8xl">{chapter === 0 ? "The Roof Doctors ACT" : currentScene.title}</motion.h1>
             <motion.p key={`p-${chapter}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mt-6 max-w-xl text-base leading-7 text-hero-foreground/80 sm:text-lg">{chapter === 0 ? "The Roof Doctors — Roofing Experts You Can Trust" : chapter === 1 ? "Over 5 years of roofing experience across Queanbeyan and Canberra City." : "Commercial and residential roofing, approached with care."}</motion.p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild variant="gold" size="lg"><a href={phoneHref}><Phone /> Call now</a></Button>
