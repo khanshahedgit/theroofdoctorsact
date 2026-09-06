@@ -168,17 +168,69 @@ function Services() {
 function VideoCarousel() {
   const [active, setActive] = useState(0);
   const slots = ["Video 01", "Video 02", "Video 03"];
-  const move = (next: number) => setActive(Math.max(0, Math.min(slots.length - 1, next)));
+  const reduce = useReducedMotion();
+  const move = (direction: -1 | 1) => setActive((current) => (current + direction + slots.length) % slots.length);
+  const dragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number }; velocity: { x: number } }) => {
+    const intent = info.offset.x + info.velocity.x * 0.08;
+    if (intent < -45) move(1);
+    if (intent > 45) move(-1);
+  };
+  const positionOf = (index: number) => {
+    const position = (index - active + slots.length) % slots.length;
+    return position === 2 ? -1 : position;
+  };
+
   return (
     <section className="overflow-hidden bg-secondary py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <Reveal className="mb-12 flex items-end justify-between gap-6"><div><Eyebrow>Facebook reels</Eyebrow><h2 className="text-4xl sm:text-6xl">See the work in motion.</h2></div><div className="hidden items-center gap-2 sm:flex"><Button variant="outline" size="icon" aria-label="Previous video" onClick={() => move(active - 1)} disabled={active === 0}><ChevronLeft /></Button><Button variant="outline" size="icon" aria-label="Next video" onClick={() => move(active + 1)} disabled={active === 2}><ChevronRight /></Button></div></Reveal>
-        <div className="mx-auto max-w-sm sm:max-w-md">
-          <motion.div className="flex cursor-grab gap-5 active:cursor-grabbing" animate={{ x: `calc(${-active * 100}% - ${active * 20}px)` }} transition={{ type: "spring", stiffness: 260, damping: 30 }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.12} onDragEnd={(_, info) => { if (info.offset.x < -45) move(active + 1); if (info.offset.x > 45) move(active - 1); }}>
-            {slots.map((slot, index) => <motion.article key={slot} animate={{ opacity: active === index ? 1 : 0.45, scale: active === index ? 1 : 0.94 }} className="aspect-[9/15] w-full shrink-0 overflow-hidden border border-border bg-deep text-hero-foreground shadow-premium"><div className="relative flex h-full flex-col items-center justify-center bg-[linear-gradient(145deg,var(--deep),color-mix(in_oklab,var(--primary)_45%,var(--deep)))] p-8 text-center"><Play className="mb-6 size-12 stroke-1 text-gold" /><p className="font-display text-3xl">{slot}</p><p className="mt-3 text-xs uppercase tracking-[0.18em] text-hero-foreground/55">Facebook Reel placeholder</p><span className="absolute bottom-6 border-t border-hero-foreground/20 pt-4 text-[10px] uppercase tracking-[0.16em] text-hero-foreground/50">Replace with your video</span></div></motion.article>)}
-          </motion.div>
+        <Reveal className="mb-12 text-center sm:mb-16"><div className="flex flex-col items-center"><Eyebrow>Facebook reels</Eyebrow><h2 className="text-4xl sm:text-6xl">See the work in motion.</h2></div></Reveal>
+
+        <motion.div
+          className="relative mx-auto h-[570px] max-w-6xl cursor-grab touch-pan-y select-none active:cursor-grabbing sm:h-[680px]"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.08}
+          onDragEnd={dragEnd}
+        >
+          {slots.map((slot, index) => {
+            const position = positionOf(index);
+            const isActive = position === 0;
+            return (
+              <motion.article
+                key={slot}
+                initial={false}
+                animate={{
+                  x: `${position * 82}%`,
+                  y: isActive ? 0 : 54,
+                  rotate: position * 3.5,
+                  scale: isActive ? 1 : 0.86,
+                  opacity: isActive ? 1 : 0.78,
+                  zIndex: isActive ? 3 : 1,
+                }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 24, mass: 0.9 }}
+                className={`absolute left-1/2 top-0 w-[min(82vw,360px)] -translate-x-1/2 border border-border bg-card p-3 pb-5 shadow-premium sm:w-[390px] sm:p-4 sm:pb-6 ${isActive ? "pointer-events-auto" : "pointer-events-none max-md:opacity-0"}`}
+                aria-hidden={!isActive}
+              >
+                <div className="relative flex aspect-[9/14] flex-col items-center justify-center overflow-hidden bg-deep p-8 text-center text-hero-foreground">
+                  <Play className="mb-6 size-12 stroke-1 text-gold" />
+                  <p className="font-display text-3xl">{slot}</p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-hero-foreground/55">Facebook Reel placeholder</p>
+                  <span className="absolute bottom-6 border-t border-hero-foreground/20 pt-4 text-[10px] uppercase tracking-[0.16em] text-hero-foreground/50">Replace with your video</span>
+                </div>
+                <div className="flex items-end justify-between px-1 pt-4 text-foreground">
+                  <p className="font-display text-xl">{slot}</p>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Facebook Reel</span>
+                </div>
+              </motion.article>
+            );
+          })}
+        </motion.div>
+
+        <div className="mx-auto mt-2 grid max-w-2xl grid-cols-[auto_1fr_auto] items-center gap-4 sm:mt-6 sm:gap-8">
+          <Button variant="ghost" onClick={() => move(-1)} className="h-auto rounded-none p-0 text-[11px] font-bold uppercase tracking-[0.16em] hover:bg-transparent hover:text-primary">Prev</Button>
+          <div className="flex min-w-0 items-center gap-3 sm:gap-5"><span className="h-px flex-1 bg-border" /><span className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:text-[10px] sm:tracking-[0.18em]">Drag to rotate</span><span className="h-px flex-1 bg-border" /></div>
+          <Button variant="ghost" onClick={() => move(1)} className="h-auto rounded-none p-0 text-[11px] font-bold uppercase tracking-[0.16em] hover:bg-transparent hover:text-primary">Next</Button>
         </div>
-        <div className="mt-8 flex justify-center gap-2">{slots.map((_, index) => <span key={index} className={`h-1 transition-all ${index === active ? "w-9 bg-gold" : "w-4 bg-border"}`} />)}</div>
       </div>
     </section>
   );
