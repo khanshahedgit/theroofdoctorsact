@@ -208,7 +208,7 @@ function VideoCarousel() {
                   zIndex: isActive ? 3 : 1,
                 }}
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 24, mass: 0.9 }}
-                className={`absolute left-1/2 top-0 w-[min(82vw,360px)] -translate-x-1/2 border border-border bg-card p-3 pb-5 shadow-premium sm:w-[390px] sm:p-4 sm:pb-6 ${isActive ? "pointer-events-auto" : "pointer-events-none max-md:opacity-0"}`}
+                className={`absolute left-1/2 top-0 w-[min(82vw,360px)] -translate-x-1/2 border border-border bg-card p-3 pb-5 shadow-premium sm:w-[390px] sm:p-4 sm:pb-6 ${isActive ? "pointer-events-auto" : "pointer-events-none max-md:!opacity-0"}`}
                 aria-hidden={!isActive}
               >
                 <div className="relative flex aspect-[9/14] flex-col items-center justify-center overflow-hidden bg-deep p-8 text-center text-hero-foreground">
